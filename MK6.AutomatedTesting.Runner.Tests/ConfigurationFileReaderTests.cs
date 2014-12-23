@@ -11,7 +11,7 @@ namespace MK6.AutomatedTesting.Runner.Tests
         [TestMethod]
         public void Read_ReturnsDictionaryWithOneValue_WhenGivenArrayWithOneValue()
         {
-            var config = ReadConfigFromResource(Resources.SingleLine);
+            var config = ReadConfigFromResource(new[] { "Key:Value" });
 
             Assert.IsTrue(config.ContainsKey("Key"));
             Assert.AreEqual("Value", config["Key"]);
@@ -20,7 +20,7 @@ namespace MK6.AutomatedTesting.Runner.Tests
         [TestMethod]
         public void Read_DoesNotIncludeLeadingSpaceInKey_WhenKeyContainsLeadingSpace()
         {
-            var config = ReadConfigFromResource(Resources.SingleLineWithLeadingSpaceInKey);
+            var config = ReadConfigFromResource(new[] { "    Key:Value" });
 
             Assert.IsTrue(config.ContainsKey("Key"));
             Assert.AreEqual("Value", config["Key"]);
@@ -29,8 +29,7 @@ namespace MK6.AutomatedTesting.Runner.Tests
         [TestMethod]
         public void Read_DoesNotIncludeTrailingSpaceInKey_WhenKeyContainsTrailingSpace()
         {
-            var configLines = new[] { "Key    : Value" };
-            var config = ReadConfigFromResource(Resources.SingleLineWithTrailingSpaceInKey);
+            var config = ReadConfigFromResource(new[] { "Key    : Value" });
 
             Assert.IsTrue(config.ContainsKey("Key"));
             Assert.AreEqual("Value", config["Key"]);
@@ -39,7 +38,7 @@ namespace MK6.AutomatedTesting.Runner.Tests
         [TestMethod]
         public void Read_DoesNotIncludeLeadingSpaceInValuey_WhenValueContainsLeadingSpace()
         {
-            var config = ReadConfigFromResource(Resources.SingleLineWithLeadingSpaceInValue);
+            var config = ReadConfigFromResource(new[] { "Key:    Value" });
 
             Assert.IsTrue(config.ContainsKey("Key"));
             Assert.AreEqual("Value", config["Key"]);
@@ -48,7 +47,7 @@ namespace MK6.AutomatedTesting.Runner.Tests
         [TestMethod]
         public void Read_DoesNotIncludeTrailingSpaceInValue_WhenValueContainsTrailingSpace()
         {
-            var config = ReadConfigFromResource(Resources.SingleLineWithTrailingspaceInValue);
+            var config = ReadConfigFromResource(new[] { "Key:Value    " });
 
             Assert.IsTrue(config.ContainsKey("Key"));
             Assert.AreEqual("Value", config["Key"]);
@@ -58,8 +57,8 @@ namespace MK6.AutomatedTesting.Runner.Tests
         public void Read_DoesNotIncludeBlanktLinesInResult()
         {
             Assert.AreEqual(
-                1, 
-                ReadConfigFromResource(Resources.ConfigFileWithLeadingBlankLine).Count);
+                1,
+                ReadConfigFromResource(new[] { " ", "Key:Value" }).Count);
         }
 
         [TestMethod]
@@ -67,7 +66,7 @@ namespace MK6.AutomatedTesting.Runner.Tests
         {
             Assert.AreEqual(
                 1,
-                ReadConfigFromResource(Resources.CommentedConfigFile).Count);
+                ReadConfigFromResource(new[] { "# Comment", "Key:Value" }).Count);
         }
 
         [TestMethod]
@@ -75,7 +74,7 @@ namespace MK6.AutomatedTesting.Runner.Tests
         {
             Assert.AreEqual(
                 0,
-                ReadConfigFromResource(Resources.EmptyConfigFile).Count);
+                ReadConfigFromResource(new string[] { }).Count);
         }
 
         [TestMethod]
@@ -83,30 +82,22 @@ namespace MK6.AutomatedTesting.Runner.Tests
         {
             Assert.AreEqual(
                 2,
-                ReadConfigFromResource(Resources.ConfigFileWithTwoLines).Count);
+                ReadConfigFromResource(new[] { "Key:Value", "Key2:Value" }).Count);
         }
 
         [TestMethod]
         public void Read_ReturnsKeyWithoutColon_WhenValueContainsAColon()
         {
-            var config = ReadConfigFromResource(Resources.SingleLineWithColonInValue);
+            var config = ReadConfigFromResource(new[] { "Key:http://localhost" });
 
             Assert.IsTrue(config.ContainsKey("Key"));
         }
 
-        private IDictionary<string, string> ReadConfigFromResource(string resource)
+        private IDictionary<string, string> ReadConfigFromResource(string[] lines)
         {
             return ConfigurationReader.Read(
                 "AnyFileName.config",
-                StringSplitterMethodFactory(resource));
-        }
-
-        private ConfigurationReader.ReadFileLinesDelegate StringSplitterMethodFactory(string resource)
-        {
-            return f => resource
-                .Split(
-                    new[] { Environment.NewLine },
-                    StringSplitOptions.RemoveEmptyEntries);
+                f => lines);
         }
     }
 }
