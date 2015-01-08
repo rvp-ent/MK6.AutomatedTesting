@@ -28,7 +28,7 @@ namespace MK6.AutomatedTesting.Load
 
             var client = new HttpClient(handler)
             {
-                Timeout = new TimeSpan(0, 5, 0),
+                Timeout = new TimeSpan(0, 20, 0),
                 BaseAddress = new Uri(context.Environment[LoadTestEnvironmentKeys.BaseUrl] as string, UriKind.Absolute)
             };
 
